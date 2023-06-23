@@ -32,7 +32,7 @@ public class Solo_Client
         byte[] msg;
         string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";
         Dictionary<string, string> response;
-        using (var server = new ResponseSocket("tcp://*:5557"))
+        using (var server = new ResponseSocket("tcp://*:2001"))
         {
             while (S != "Shutdown")
             {
