@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Hudson.SoloSoft.Communications;
+﻿using Hudson.SoloSoft.Communications;
 using NetMQ;
-using Newtonsoft.Json;
 using NetMQ.Sockets;
-using System.Security.Cryptography;
-using System.Text;
-using System.Net.Configuration;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 public class Solo_Client
@@ -22,8 +20,6 @@ public class Solo_Client
 
     public static void Main(string[] args)
     {
-        // SoloServer t = new SoloServer();
-        // t.Start(11139);
         SoloClient client = new SoloClient();
         client.Connect(11139);
         string T = "0000";
@@ -38,8 +34,6 @@ public class Solo_Client
             {
 
                 Console.Out.WriteLine(server.ToString());
-                //int charCount = Encoding.ASCII.GetChars(responseBytes, 0, bytesReceived, responseChars, 0);
-                //System.Threading.Thread.Sleep(10000);
                 string t = server.ReceiveFrameString();
 
                 // check if SOLOSoft already running
@@ -66,7 +60,6 @@ public class Solo_Client
                 else
                 {
                     Console.Out.WriteLine("SOLOSoft already open");
-                    //Console.Out.WriteLine(client.RunCommand("CLOSEALLFILES"));
                 }
 
                 Console.Out.WriteLine(t);
@@ -76,14 +69,12 @@ public class Solo_Client
                 {
                     string[] f = m.action_vars["hso_contents"].Split('\n');
                     File.WriteAllLines("C:\\labautomation\\instructions_wei\\" + m.action_vars["hso_basename"], f);
-                    //Console.Out.WriteLine(client.IsConnected);
 
                     S = m.action_handle;
                     T = client.RunCommand("LOAD C:\\labautomation\\instructions_wei\\" + m.action_vars["hso_basename"]);
                     Console.Out.WriteLine(T);
                     T = client.RunCommand("RUN C:\\labautomation\\instructions_wei\\" + m.action_vars["hso_basename"]);
                     Console.Out.WriteLine(T);
-                    // client.RunCommand("RUN C:\\labautomation\\instructions_wei\\shuck_tip.hso"));
                     try
                     {
                         // try and check the status
@@ -182,8 +173,4 @@ public class Solo_Client
             }
         }
     }
-    public Solo_Client()
-    {
-    }
-
 }
