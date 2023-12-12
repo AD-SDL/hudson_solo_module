@@ -4,6 +4,7 @@ using Hudson.SoloSoft.Communications;
 using McMaster.Extensions.CommandLineUtils;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -33,11 +34,10 @@ namespace SoloNode
         [Option(Description = "Whether or not to simulate the instrument (note: if the instrument is connected, this does nothing)")]
         public bool Simulate { get; } = true;
 
-        public string state = ModuleStatus.INIT; //why aren't the util functions being pulled in here?
+        public string state = ModuleStatus.INIT; 
+        
         private static SoloClient client;
         private IRestServer server;
-        string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";
-
 
         private void OnExecute()
         {
@@ -64,10 +64,22 @@ namespace SoloNode
 
         private void InitializeSoloClient()
         {
-            SoloClient client = new SoloClient();
-            client.Connect(11139);
+            try
+            {
+                SoloClient client = new SoloClient();
+                client.Connect(11139);
+                state = ModuleStatus.IDLE;
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                state = ModuleStatus.ERROR;
 
-            // MAYBE THIS SHOULD GO IN ACTION POST (this should happen once per action message)
+            }
+            
+
+/*            // MAYBE THIS SHOULD GO IN ACTION POST (this should happen once per action message)
             // check if SOLOSoft already running
             Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(programPath));
 
@@ -89,7 +101,7 @@ namespace SoloNode
             {
                 Console.Out.WriteLine("SOLOSoft already open");
 
-            }
+            }*/
 
 
 

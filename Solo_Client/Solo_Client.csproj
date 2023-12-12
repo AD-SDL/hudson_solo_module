@@ -42,7 +42,6 @@
   <ItemGroup>
     <Compile Include="SoloNode.cs" />
     <Compile Include="SoloRestServer.cs" />
-    <Compile Include="Solo_Client.cs" />
     <Compile Include="utils.cs" />
   </ItemGroup>
   <ItemGroup>
