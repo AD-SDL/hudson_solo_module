@@ -59,8 +59,8 @@ namespace SoloNode
             var result = UtilityFunctions.action_response();
             string state = _server.Locals.GetAs<string>("state");
             SoloClient client = _server.Locals.GetAs<SoloClient>("client");
-            string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  // Switch to non hardcoded path?
-            string status_code = "0000"; // what is this? an error code?
+            string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  
+            string status_code = "0000"; 
             string s = "";  // instrument state
 
             if (state == ModuleStatus.BUSY)
@@ -75,7 +75,7 @@ namespace SoloNode
                 _server.Locals.TryUpdate("state", ModuleStatus.BUSY, _server.Locals.GetAs<string>("state"));
                 switch (action_handle)
                 {
-                    case "run_program":
+                    case "run_protocol":
                         // check if SOLOSoft already running
                         Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(programPath));
 

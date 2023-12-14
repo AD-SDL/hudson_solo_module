@@ -1,18 +1,11 @@
 ﻿using Grapevine;
-//old imports
 using Hudson.SoloSoft.Communications;
 using McMaster.Extensions.CommandLineUtils;
 using System;
-using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
+
 
 namespace SoloNode
 {
-    //public class Callback_wrapper <--- what would the eqivalent be for the SOLO?
-
     class Program
     {
         public static int Main(string[] args) => CommandLineApplication.Execute<Program>(args);
@@ -66,7 +59,7 @@ namespace SoloNode
         {
             try
             {
-                SoloClient client = new SoloClient();
+                client = new SoloClient();
                 client.Connect(11139);
                 state = ModuleStatus.IDLE;
                 
@@ -77,36 +70,6 @@ namespace SoloNode
                 state = ModuleStatus.ERROR;
 
             }
-            
-
-/*            // MAYBE THIS SHOULD GO IN ACTION POST (this should happen once per action message)
-            // check if SOLOSoft already running
-            Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(programPath));
-
-            // If SOLOSoft not already running, open it 
-            if (processes.Length == 0)
-            {
-                Console.Out.WriteLine("SOLOSoft not open");
-                Process.Start(programPath);
-                Thread.Sleep(6000);  // wait for program to open
-                SendKeys.SendWait("{ENTER}");  //press enter to bring up login 
-                Thread.Sleep(1000); //wait for login window to appear
-                SendKeys.SendWait("{ENTER}");  //press enter to bypass login screen
-                Console.Out.WriteLine("SOLOSoft opened");
-                Console.Out.WriteLine(client.RunCommand("CLOSEALLFILES"));  // ensure no other SOLO protocols open
-                Console.Out.WriteLine("Closed all files");
-            }
-            // No need to open SOLOSoft if already open 
-            else
-            {
-                Console.Out.WriteLine("SOLOSoft already open");
-
-            }*/
-
-
-
-
-
         }
 
 
