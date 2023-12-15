@@ -60,6 +60,7 @@ namespace SoloNode
             string state = _server.Locals.GetAs<string>("state");
             SoloClient client = _server.Locals.GetAs<SoloClient>("client");
             string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  
+            string tipsFilePath = "C:\\ProgramData\\Hudson Robotics\\SoloSoft\\SoloSoft\\TipCounts.csv";
             string status_code = "0000"; 
             string s = "";  // instrument state
 
@@ -148,9 +149,32 @@ namespace SoloNode
                         break; 
 
                     case "refill_tips":
-                        // TODO
-                        Console.Out.WriteLine("Refill tips called");
-                        break;
+                        try
+                        {
+                            int tipsPosition = Int32.Parse(args["position"]); 
+                            string[] lines = File.ReadAllLines(tipsFilePath);  // read the contents of the CSV file
+                            if (tipsPosition > 0 && tipsPosition <= lines.Length)  // check if the target row exists
+                            {
+                                string[] columns = lines[tipsPosition - 1].Split(',');  // split csv string into columns(locate 3rd column)
+                                columns[2] = columns[2].Replace("0", "1"); // column 2 (3rd column) is edited to replace tips
+                                string updatedLine = string.Join(",", columns);  // join the columns back into a line
+                                lines[tipsPosition - 1] = updatedLine;  // update the line in the CSV file
+                                File.WriteAllLines(tipsFilePath, lines);  // write the updated contents back to the CSV file
+                                result = UtilityFunctions.action_response(StepStatus.SUCCEEDED, "Ran SOLO refill tips", "");
+
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid tip refill position.");
+                                result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Invalid tip refill position");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Out.WriteLine(ex.ToString());
+                            result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Could not refill SOLO tips");
+                        }
+                        break;  
 
                     default:
                         Console.Out.WriteLine("Unknown action: " + action_handle);
