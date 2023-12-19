@@ -14,35 +14,45 @@ namespace SoloNode
         {
             // execute on close of program
             Console.WriteLine("Exiting...");
-            client.Disconnect();  
-            server.Stop();  
+            client.Disconnect();
+            server.Stop();
         }
 
+        // CLI Options
         [Option(Description = "Server Hostname")]
         public string Hostname { get; set; } = "+";
 
         [Option(Description = "Server Port")]
-        public int Port { get; } = 2003;  
+        public int Port { get; } = 2003;
 
         [Option(Description = "Whether or not to simulate the instrument (note: if the instrument is connected, this does nothing)")]
         public bool Simulate { get; } = true;
 
-        public string state = ModuleStatus.INIT; 
-        
+        [Option(Description = "Path to the SOLOSoft executable")]
+        public string ExecutablePath { get; } = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";
+
+        [Option(Description = "Path to the Tips File in ProgramData")]
+        public string TipsFilePath { get; } = @"C:\ProgramData\Hudson Robotics\SoloSoft\SoloSoft\TipCounts.csv";
+
+
+        public string state = ModuleStatus.INIT;
+
         private static SoloClient client;
         private IRestServer server;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used by CommandLineApplication.Execute (see above)")]
         private void OnExecute()
         {
             InitializeSoloClient();
 
             server = RestServerBuilder.UseDefaults().Build();
             string server_url = "http://" + Hostname + ":" + Port.ToString() + "/";
-            Console.WriteLine(server_url);
             server.Prefixes.Clear();
             server.Prefixes.Add(server_url);
             server.Locals.TryAdd("state", state);
             server.Locals.TryAdd("client", client);
+            server.Locals.TryAdd("executablePath", ExecutablePath);
+            server.Locals.TryAdd("tipsFilePath", TipsFilePath);
             try
             {
                 server.Start();
@@ -62,7 +72,7 @@ namespace SoloNode
                 client = new SoloClient();
                 client.Connect(11139);
                 state = ModuleStatus.IDLE;
-                
+
             }
             catch (Exception ex)
             {
