@@ -1,17 +1,17 @@
 ﻿using Grapevine;
+using Hudson.SoloSoft.Communications;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Hudson.SoloSoft.Communications;
-using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace SoloNode
 {
-	[RestResource]
+    [RestResource]
     public class SoloRestServer
     {
         private readonly IRestServer _server;
@@ -53,30 +53,25 @@ namespace SoloNode
         [RestRoute("Post", "/action")]
         public async Task Action(IHttpContext context)
         {
+            // Parse action inputs
             string action_handle = context.Request.QueryString["action_handle"];
-            string action_vars = context.Request.QueryString["action_vars"];
-            Dictionary<string, string> args = JsonConvert.DeserializeObject<Dictionary<string, string>>(action_vars);
-            var result = UtilityFunctions.action_response();
+            Dictionary<string, string> args = JsonConvert.DeserializeObject<Dictionary<string, string>>(context.Request.QueryString["action_vars"]);
+            Dictionary<string, string> action_response;
+
+            // Inject Dependencies
             string state = _server.Locals.GetAs<string>("state");
             SoloClient client = _server.Locals.GetAs<SoloClient>("client");
-
-            // TESTING
-            string programPath = _server.Locals.GetAs<string>("programPath");
+            string executablePath = _server.Locals.GetAs<string>("executablePath");
             string tipsFilePath = _server.Locals.GetAs<string>("tipsFilePath");
-            string tempFolderPath = _server.Locals.GetAs<string>("tempFolderPath");
-            /*string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  
-            string tipsFilePath = "C:\\ProgramData\\Hudson Robotics\\SoloSoft\\SoloSoft\\TipCounts.csv";*/
-
-            string status_code = "0000"; 
-            string s = "";  // instrument state
+            string instrument_status;
 
             if (state == ModuleStatus.BUSY)
             {
-                result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Module is Busy");
-                await context.Response.SendResponseAsync(JsonConvert.SerializeObject(result));
+                action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Module is Busy");
+                await context.Response.SendResponseAsync(JsonConvert.SerializeObject(action_response));
             }
-            
-            // if module not busy
+
+            // If Module isn't busy, try to run the action
             try
             {
                 _server.Locals.TryUpdate("state", ModuleStatus.BUSY, _server.Locals.GetAs<string>("state"));
@@ -84,13 +79,13 @@ namespace SoloNode
                 {
                     case "run_protocol":
                         // check if SOLOSoft already running
-                        Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(programPath));
+                        Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(executablePath));
 
                         // If SOLOSoft not already running, open it 
                         if (processes.Length == 0)
                         {
                             Console.Out.WriteLine("SOLOSoft not open");
-                            Process.Start(programPath);
+                            Process.Start(executablePath);
                             Thread.Sleep(6000);  // wait for program to open
                             SendKeys.SendWait("{ENTER}");  //press enter to bring up login 
                             Thread.Sleep(1000); //wait for login window to appear
@@ -109,31 +104,27 @@ namespace SoloNode
                         //collect protocol details and save to temp file 
                         string[] hso_contents = args["hso_contents"].Split('\n');
                         string hso_basename = args["hso_basename"];
-
-                        //TESTING
-                        string tempFilePath = tempFolderPath + args["hso_basename"];
-                        //string temp_file_path = "C:\\labautomation\\instructions_wei\\" + args["hso_basename"];
-
-                        File.WriteAllLines(tempFilePath, hso_contents);
+                        string temp_file_path = "C:\\labautomation\\instructions_wei\\" + args["hso_basename"];
+                        File.WriteAllLines(temp_file_path, hso_contents);
 
                         // Run commands to execute hso protocol on SOLO
-                        status_code = client.RunCommand("LOAD " + tempFilePath);
-                        Console.Out.WriteLine(status_code);
-                        status_code = client.RunCommand("RUN " + tempFilePath);
-                        Console.Out.WriteLine(status_code);
+                        instrument_status = client.RunCommand("LOAD " + temp_file_path);
+                        Console.Out.WriteLine(instrument_status);
+                        instrument_status = client.RunCommand("RUN " + temp_file_path);
+                        Console.Out.WriteLine(instrument_status);
 
                         try
                         {
                             // monitor status of running protocol, sleep until run complete
-                            s = client.RunCommand("GETSTATUS");
-                            while (s != "IDLE")
+                            instrument_status = client.RunCommand("GETSTATUS");
+                            while (instrument_status != "IDLE")
                             {
                                 Thread.Sleep(10000);
-                                s = client.RunCommand("GETSTATUS");
+                                instrument_status = client.RunCommand("GETSTATUS");
                             }
 
                             // close SOLOSoft at end of protocol run
-                            processes = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(programPath));
+                            processes = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(executablePath));
                             if (processes.Length == 0)
                             {
                                 Console.Out.WriteLine("SOLOSoft is already closed");
@@ -142,28 +133,28 @@ namespace SoloNode
                             {
                                 Process soloSoft = processes[0];
                                 soloSoft.Kill();
-                                Console.Out.WriteLine("Process Killed: " + programPath);
+                                Console.Out.WriteLine("Process Killed: " + executablePath);
                                 Thread.Sleep(3000);
                             }
 
                             // Send response if protocol complete at SoloSoft closed
-                            result = UtilityFunctions.action_response(StepStatus.SUCCEEDED, "Ran SOLO protocol", "");
-                            Console.Out.WriteLine("Action Finished: run_protocol"); 
-
+                            action_response = UtilityFunctions.ActionResponse(StepStatus.SUCCEEDED, "Ran SOLO protocol", "");
+                            Console.Out.WriteLine("Action Finished: run_protocol");
                         }
                         catch (Exception ex)
                         {
                             // SOLOSoft likely crashed
                             Console.Out.WriteLine(ex.ToString());
                             Console.Out.WriteLine("SOLOSoft likely crashed");
-                            result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Could not run SOLO protocol");
+                            _server.Locals.TryUpdate("state", ModuleStatus.ERROR, _server.Locals.GetAs<string>("state"));
+                            action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Could not run SOLO protocol");
                         }
-                        break; 
+                        break;
 
                     case "refill_tips":
                         try
                         {
-                            int tipsPosition = Int32.Parse(args["position"]); 
+                            int tipsPosition = Int32.Parse(args["position"]);
                             string[] lines = File.ReadAllLines(tipsFilePath);  // read the contents of the CSV file
                             if (tipsPosition > 0 && tipsPosition <= lines.Length)  // check if the target row exists
                             {
@@ -172,37 +163,38 @@ namespace SoloNode
                                 string updatedLine = string.Join(",", columns);  // join the columns back into a line
                                 lines[tipsPosition - 1] = updatedLine;  // update the line in the CSV file
                                 File.WriteAllLines(tipsFilePath, lines);  // write the updated contents back to the CSV file
-                                result = UtilityFunctions.action_response(StepStatus.SUCCEEDED, "Ran SOLO refill tips", "");
-
+                                action_response = UtilityFunctions.ActionResponse(StepStatus.SUCCEEDED, "Ran SOLO refill tips", "");
                             }
                             else
                             {
                                 Console.WriteLine("Invalid tip refill position.");
-                                result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Invalid tip refill position");
+                                _server.Locals.TryUpdate("state", ModuleStatus.ERROR, _server.Locals.GetAs<string>("state"));
+                                action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Invalid tip refill position");
                             }
                         }
                         catch (Exception ex)
                         {
                             Console.Out.WriteLine(ex.ToString());
-                            result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Could not refill SOLO tips");
+                            _server.Locals.TryUpdate("state", ModuleStatus.ERROR, _server.Locals.GetAs<string>("state"));
+                            action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Could not refill SOLO tips");
                         }
-                        break;  
+                        break;
 
                     default:
                         Console.Out.WriteLine("Unknown action: " + action_handle);
-                        result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Unknown action: " + action_handle);
+                        action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Unknown action: " + action_handle);
                         break;
                 }
                 _server.Locals.TryUpdate("state", ModuleStatus.IDLE, _server.Locals.GetAs<string>("state"));
             }
             catch (Exception ex)
             {
-                _server.Locals.TryUpdate("state", ModuleStatus.IDLE, _server.Locals.GetAs<string>("state"));
                 Console.Out.WriteLine(ex.ToString());
-                result = UtilityFunctions.action_response(StepStatus.FAILED, "", "Step failed: " + ex.ToString());
+                _server.Locals.TryUpdate("state", ModuleStatus.ERROR, _server.Locals.GetAs<string>("state"));
+                action_response = UtilityFunctions.ActionResponse(StepStatus.FAILED, "", "Step failed: " + ex.ToString());
             }
 
-            await context.Response.SendResponseAsync(JsonConvert.SerializeObject(result)); 
+            await context.Response.SendResponseAsync(JsonConvert.SerializeObject(action_response));
 
         }
     }

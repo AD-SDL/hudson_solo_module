@@ -1,17 +1,25 @@
-# solo_module
+# hudson_solo_module
 
-A template module, implemented in python, for integrating a device into a WEI workcell.
+Contains `hudson_solo_module`, providing an interface and adapter that works alongside Hudson's SOLOSOFT application to automate a Hudson Solo Liquidhandler.
 
-## Using This Template
+## Installation Notes
 
-[Creating a Repository From a Template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
+- After cloning the repo and installing SOLOSOFT, open up the Visual Studio Solution in Visual Studio 2022 or later.
+- Go to `View -> Other Windows -> Package Manager Console`
+- Paste or type in `Update-Package -reinstall` in the console to install the appropriate NuGet dependencies on the local machine
 
-## Renaming
+## REST Server Accessibility
 
-To automatically replace `solo` with the name of your instrument, run the "Rename Module Repo" GitHub Actions Workflow in your repository: [Manually Running a Workflow](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow)
+To make the server accessible, run the following in a terminal as Administrator
 
-N.B. this assumes your repository is named using the `<instrument_name>_module` format.
+```
+netsh http add urlacl url=http://+:2005/ user=<USER> listen=yes delegate=yes
+```
 
-## TODO's
+Replace `2005` with the port you intend to use, if it differs from the default, and `<USER>` with the username that will be running the server (you may need to use the form `DOMAIN/USER`)
 
-Throughout this module template, there are a number of comments marked `TODO`. You can use search/find and replace to help ensure you're taking full advantage of the module template.
+## Firewall
+
+To interface with the module from another device, you'll need to [open up the port](https://www.windowscentral.com/how-open-port-windows-firewall) you intend to run the module's server on (2005 by default). 
+On most Windows devices, all incoming ports are blocked by the firewall by default.
+
