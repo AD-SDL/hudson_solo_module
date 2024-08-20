@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Hudson.SoloSoft.Communications;
+﻿using Hudson.SoloSoft.Communications;
 using NetMQ;
-using Newtonsoft.Json;
 using NetMQ.Sockets;
-using System.Security.Cryptography;
-using System.Text;
-using System.Net.Configuration;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 public class Solo_Client
@@ -52,9 +50,13 @@ public class Solo_Client
 
                     // Wait for program to open then press 'Enter'
                     System.Threading.Thread.Sleep(6000);
+
+
                     SendKeys.SendWait("{ENTER}");
 
                     System.Threading.Thread.Sleep(1000);
+
+
                     SendKeys.SendWait("{ENTER}");
 
                     Console.Out.WriteLine("SOLOSoft opened");
@@ -94,7 +96,7 @@ public class Solo_Client
                             status = client.RunCommand("GETSTATUS");
                         }
 
-                        /// check if SoloSoft Running at end of protocol
+                        // check if SoloSoft Running at end of protocol
                         processes = Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(programPath));
                         if (processes.Length == 0)
                         {
@@ -102,7 +104,7 @@ public class Solo_Client
                         }
                         else
                         {
-                            /// Close SOLOSoft at end of protocol
+                            // Close SOLOSoft at end of protocol
                             Process soloSoft = processes[0];
                             soloSoft.Kill();
                             Console.Out.WriteLine("Process Killed: " + programPath);
@@ -169,21 +171,19 @@ public class Solo_Client
                     {
                         Console.WriteLine("Invalid target row.");
                     }
-
+                    Console.WriteLine("Starting Response");
                     // Send response if SOLO protocol finished
                     response = new Dictionary<string, string>();
                     response.Add("action_response", "StepStatus.SUCCEEDED");
                     response.Add("action_msg", "yay");
                     response.Add("action_log", "birch");
                     msg = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
+                    Console.WriteLine("Sending Message");
                     server.SendFrame(msg);
+                    Console.WriteLine("Message Sent");
                 }
 
             }
         }
     }
-    public Solo_Client()
-    {
-    }
-
 }

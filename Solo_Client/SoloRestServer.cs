@@ -59,8 +59,14 @@ namespace SoloNode
             var result = UtilityFunctions.action_response();
             string state = _server.Locals.GetAs<string>("state");
             SoloClient client = _server.Locals.GetAs<SoloClient>("client");
-            string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  
-            string tipsFilePath = "C:\\ProgramData\\Hudson Robotics\\SoloSoft\\SoloSoft\\TipCounts.csv";
+
+            // TESTING
+            string programPath = _server.Locals.GetAs<string>("programPath");
+            string tipsFilePath = _server.Locals.GetAs<string>("tipsFilePath");
+            string tempFolderPath = _server.Locals.GetAs<string>("tempFolderPath");
+            /*string programPath = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";  
+            string tipsFilePath = "C:\\ProgramData\\Hudson Robotics\\SoloSoft\\SoloSoft\\TipCounts.csv";*/
+
             string status_code = "0000"; 
             string s = "";  // instrument state
 
@@ -93,21 +99,27 @@ namespace SoloNode
                             Console.Out.WriteLine(client.RunCommand("CLOSEALLFILES"));  // ensure no other SOLO protocols open
                             Console.Out.WriteLine("Closed all files");
                         }
-                        else
+                        else  // SOLOSoft is already open, this should not happen. Raise an error and exit action switch
                         {
                             Console.Out.WriteLine("SOLOSoft already open");
+                            result = UtilityFunctions.action_response(StepStatus.FAILED, "", "SOLOSoft application is already open. It must be closed at start of run_protocol action");
+                            break;
 
                         }
                         //collect protocol details and save to temp file 
                         string[] hso_contents = args["hso_contents"].Split('\n');
-                        string hso_basename = args["hso_basename"]; 
-                        string temp_file_path = "C:\\labautomation\\instructions_wei\\" + args["hso_basename"];
-                        File.WriteAllLines(temp_file_path, hso_contents);
+                        string hso_basename = args["hso_basename"];
+
+                        //TESTING
+                        string tempFilePath = tempFolderPath + args["hso_basename"];
+                        //string temp_file_path = "C:\\labautomation\\instructions_wei\\" + args["hso_basename"];
+
+                        File.WriteAllLines(tempFilePath, hso_contents);
 
                         // Run commands to execute hso protocol on SOLO
-                        status_code = client.RunCommand("LOAD " + temp_file_path);
+                        status_code = client.RunCommand("LOAD " + tempFilePath);
                         Console.Out.WriteLine(status_code);
-                        status_code = client.RunCommand("RUN " + temp_file_path);
+                        status_code = client.RunCommand("RUN " + tempFilePath);
                         Console.Out.WriteLine(status_code);
 
                         try

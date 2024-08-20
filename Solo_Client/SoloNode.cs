@@ -22,8 +22,20 @@ namespace SoloNode
         public string Hostname { get; set; } = "+";
 
         [Option(Description = "Server Port")]
-        public int Port { get; } = 2003;  
+        public int Port { get; } = 2003;
 
+        // TESTING (Add hardcoded paths as cli parameters)
+        [Option(Description = "SOLOSoft Application Path")]
+        public string executablePath { get; set; } = @"C:\Program Files (x86)\Hudson Robotics\SoloSoft\SOLOSoft.exe";
+
+        [Option(Description = "SOLOSoft Tip Counts CSV File Path")]
+        public string tipsFilePath { get; set; } = @"C:\ProgramData\Hudson Robotics\SoloSoft\SoloSoft\TipCounts.csv";
+
+        [Option(Description = "Temp SOLOSoft Protocols Folder Path", ShortName = "T")]
+        public string tempFolderPath { get; set; } = @"C:\labautomation\instructions_wei\";
+
+        // END TESTING  --------------------------------------------------------------------------
+ 
         [Option(Description = "Whether or not to simulate the instrument (note: if the instrument is connected, this does nothing)")]
         public bool Simulate { get; } = true;
 
@@ -43,6 +55,11 @@ namespace SoloNode
             server.Prefixes.Add(server_url);
             server.Locals.TryAdd("state", state);
             server.Locals.TryAdd("client", client);
+
+            // TESTING
+            server.Locals.TryAdd("programPath", executablePath);
+            server.Locals.TryAdd("tipsFilePath", tipsFilePath);
+            server.Locals.TryAdd("tempFolderPath", tempFolderPath);
             try
             {
                 server.Start();
@@ -76,5 +93,6 @@ namespace SoloNode
     }
 
 }
+
 
 
