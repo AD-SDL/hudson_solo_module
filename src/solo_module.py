@@ -12,7 +12,7 @@ from typing_extensions import Annotated
 from wei.modules.rest_module import RESTModule
 from wei.types.module_types import ModuleState
 from wei.types.step_types import (
-    StepResponse,
+    StepResponse, StepSucceeded
 )
 from wei.utils import extract_version
 
@@ -105,7 +105,7 @@ def run_protocol(
 
         solo.close_solo_soft()
 
-    return StepResponse.step_succeeded("Successfully ran protocol.")
+    return StepSucceeded()
 
 
 @solo_module.action()
@@ -129,10 +129,8 @@ def refill_tips(
             else:
                 lines.append(line)
             i += 1
-        print(lines)
-        # tips_file.writelines(lines)
-    return StepResponse.step_succeeded("Successfully refilled tips.")
-
+        tips_file.writelines(lines)
+    return StepSucceeded()
 
 if __name__ == "__main__":
     solo_module.start()
