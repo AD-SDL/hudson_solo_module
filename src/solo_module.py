@@ -101,7 +101,7 @@ def run_protocol(
         print(status_code)
 
         while solo.client.RunCommand("GETSTATUS") != "IDLE":
-            time.sleep(10)
+            time.sleep(1)
 
         solo.close_solo_soft()
 
@@ -115,20 +115,18 @@ def refill_tips(
 ) -> StepResponse:
     """Marks a tipbox at a specific position on the solo deck as refilled."""
     position = int(position)
-    print(state.tipsFilePath)
-    with open(state.tipsFilePath, mode="r+") as tips_file:
-        i = 1
+    with open(state.tipsFilePath, mode="r") as tips_file:
+        i = 0
         lines = []
         for line in tips_file:
-            print(line)
-            if i == position:
+            if i == position - 1:
                 columns = line.split(",")
                 columns[2] = columns[2].replace("0", "1")
                 lines.append(",".join(columns))
-                print("NEW LINE:", lines[-1])
             else:
                 lines.append(line)
             i += 1
+    with open(state.tipsFilePath, mode="w") as tips_file:
         tips_file.writelines(lines)
     return StepSucceeded()
 
