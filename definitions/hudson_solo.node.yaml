@@ -1,0 +1,13 @@
+node_name: hudson_solo
+node_url: null
+node_description: Node for the Hudson SOLO liquid handler
+node_type: device
+module_name: hudson_solo_module
+module_version: 0.0.1
+capabilities: null
+commands: {}
+is_template: true
+config_defaults: {}
+
+
+
