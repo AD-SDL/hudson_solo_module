@@ -10,8 +10,6 @@ import clr
 clr.AddReference(
     r"C:\Program Files (x86)\Hudson Robotics\SoloSoft\Hudson.SoloSoft.Communications.dll"
 )
-# clr.AddReference("System.IO.Path")
-# clr.AddReference("System.Diagnostics")
 clr.AddReference("System.Windows.Forms")
 
 from Hudson.SoloSoft.Communications import SoloClient  # noqa
@@ -27,14 +25,14 @@ class Solo:
         self,
         port: int = 11139,
         solo_soft_path: str = "C:\\Program Files (x86)\\Hudson Robotics\\SoloSoft\\SOLOSoft.exe",
-    ):
+    ) -> None:
         """Create the Solo Interface and connect to the specified device"""
         self.client = SoloClient()
         self.port = port
         self.client.Connect(self.port)
         self.solo_soft_path = solo_soft_path
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Disconnect from the Solo device"""
         self.client.Disconnect()
 
@@ -43,7 +41,7 @@ class Solo:
         """Check whether the solo client is currently connected"""
         return self.client.IsConnected
 
-    def open_solo_soft(self):
+    def open_solo_soft(self) -> None:
         """Attempts to open solo soft"""
         processes = Process.GetProcessesByName(
             Path.GetFileNameWithoutExtension(self.solo_soft_path)
@@ -58,7 +56,7 @@ class Solo:
             SendKeys.SendWait("{ENTER}")
             self.client.RunCommand("CLOSEALLFILES")
 
-    def close_solo_soft(self):
+    def close_solo_soft(self) -> None:
         """Close solo soft"""
         processes = Process.GetProcessesByName(
             Path.GetFileNameWithoutExtension(self.solo_soft_path)

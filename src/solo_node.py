@@ -59,17 +59,12 @@ class SOLONode(RestNode):
         protocol_file: Annotated[UploadFile, "The protocol file (.hso) to run"],
     ) -> None:
         """Runs the provided SoloSoft .hso protocol file."""
-
-        # solo: Solo = self.solo_interface
         self.solo_interface.open_solo_soft()
         with NamedTemporaryFile(delete_on_close=False) as f:
             f.write(protocol_file.file.read())
             f.close()
-            print(f.name)
-            status_code = self.solo_interface.client.RunCommand("LOAD " + f.name)
-            print(status_code)
-            status_code = self.solo_interface.solo.client.RunCommand("RUN " + f.name)
-            print(status_code)
+            self.solo_interface.client.RunCommand("LOAD " + f.name)
+            self.solo_interface.client.RunCommand("RUN " + f.name)
 
             while self.solo_interface.client.RunCommand("GETSTATUS") != "IDLE":
                 time.sleep(1)
@@ -83,7 +78,7 @@ class SOLONode(RestNode):
     ) -> None:
         """Marks a tipbox at a specific position on the solo deck as refilled."""
         position = int(position)
-        with open(self.config.tipsFilePath) as tips_file:
+        with open(self.config.tipsFilePath) as tips_file:  # noqa
             i = 0
             lines = []
             for line in tips_file:
@@ -93,8 +88,8 @@ class SOLONode(RestNode):
                     lines.append(",".join(columns))
                 else:
                     lines.append(line)
-                i += 1
-        with open(self.config.tipsFilePath, mode="w") as tips_file:
+                i += 1  # noqa
+        with open(self.config.tipsFilePath, mode="w") as tips_file:  # noqa
             tips_file.writelines(lines)
 
 
