@@ -3,6 +3,7 @@ REST-based node that interfaces with MADSci and provides a simple Sleep(t) funct
 """
 
 import time
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Annotated
 
@@ -78,7 +79,7 @@ class SOLONode(RestNode):
     ) -> None:
         """Marks a tipbox at a specific position on the solo deck as refilled."""
         position = int(position)
-        with open(self.config.tipsFilePath) as tips_file:  # noqa
+        with Path(self.config.tips_file_path).open() as tips_file:
             i = 0
             lines = []
             for line in tips_file:
@@ -89,7 +90,7 @@ class SOLONode(RestNode):
                 else:
                     lines.append(line)
                 i += 1  # noqa
-        with open(self.config.tipsFilePath, mode="w") as tips_file:  # noqa
+        with Path(self.config.tips_file_path).open(mode="w") as tips_file:
             tips_file.writelines(lines)
 
 
