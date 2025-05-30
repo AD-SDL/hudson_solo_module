@@ -1,0 +1,12 @@
+node_name: hudson_solo
+node_id: 01JV2YA5Z7D1JSBZSG7GHF8RJ4
+node_url: null
+node_description: Node for the Hudson SOLO liquid handler
+node_type: device
+module_name: hudson_solo_module
+module_version: 0.0.1
+capabilities: null
+commands: {}
+is_template: false
+config_defaults:
+  port: 2003

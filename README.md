@@ -1,24 +1,47 @@
 # hudson_solo_module
 
-Contains `hudson_solo_module`, providing an interface and adapter that works alongside Hudson's SOLOSOFT application to automate a Hudson Solo Liquidhandler.
+Contains the `hudson_solo_module` python package, providing an interface and adapter that works alongside Hudson's SOLOSOFT application to automate a Hudson Solo Liquidhandler.
 
-## Installation Notes
+## Installation (Windows)
 
-- After cloning the repo and installing SOLOSOFT, open up the Visual Studio Solution in Visual Studio 2022 or later.
-- Go to `View -> Other Windows -> Package Manager Console`
-- Paste or type in `Update-Package -reinstall` in the console to install the appropriate NuGet dependencies on the local machine
+For either method described below, you'll need to [clone this repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
-## REST Server Accessibility
+### Using venv
+1. Open Command Prompt and navigate to the project directory:
+   ```sh
+   cd path\to\hudson_solo_module
+   ```
+2. Create a virtual environment:
+   ```sh
+   python -m venv .venv
+   ```
+3. Activate the virtual environment:
+   ```sh
+   .venv\Scripts\activate
+   ```
+4. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-To make the server accessible, run the following in a terminal as Administrator
+### Using pdm
+1. Install [PDM](https://pdm.fming.dev/latest/#installationhttps://pdm-project.org/latest/#installation):
+2. Navigate to the project directory:
+   ```sh
+   cd path\to\hudson_solo_module
+   ```
+3. Install dependencies:
+   ```sh
+   pdm install
+   ```
+
+## Starting a Node
+
+
+To start the MADSci node:
 
 ```
-netsh http add urlacl url=http://+:2005/ user=<USER> listen=yes delegate=yes
+python -m hudson_solo_module.solo_node --definition path\to\__.node.yaml
 ```
 
-Replace `2005` with the port you intend to use, if it differs from the default, and `<USER>` with the username that will be running the server (you may need to use the form `DOMAIN/USER`)
-
-## Firewall
-
-To interface with the module from another device, you'll need to [open up the port](https://www.windowscentral.com/how-open-port-windows-firewall) you intend to run the module's server on (2005 by default).
-On most Windows devices, all incoming ports are blocked by the firewall by default.
+An example node definition file is included in `definitions/hudson_solo.node.yaml`
