@@ -7,12 +7,19 @@ dependencies = [
     "madsci.node_module>=0.3.0",
     "pythonnet",
 ]
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.9.1,<3.13"
 readme = "README.md"
 license = {text = "MIT"}
 
 [project.urls]
 homepage = "https://github.com/AD-SDL/hudson_solo_module"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
 
 [dependency-groups]
 dev = [
