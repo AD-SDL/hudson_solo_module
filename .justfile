@@ -9,3 +9,9 @@ init:
   @pdm install -G:all
   @OSTYPE="" . .venv/bin/activate
   @which pre-commit && pre-commit install && pre-commit autoupdate || true
+
+# Run the pre-commit checks
+checks:
+  @pre-commit run --all-files || { echo "Checking fixes\n" ; pre-commit run --all-files; }
+# Run the pre-commit checks
+check: checks

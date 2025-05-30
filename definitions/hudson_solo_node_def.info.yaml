@@ -30,15 +30,15 @@ actions:
   run_protocol:
     name: run_protocol
     description: Runs the provided SoloSoft .hso protocol file.
-    args:
+    args: {}
+    locations: {}
+    files:
       protocol_file:
         name: protocol_file
         description: The protocol file (.hso) to run
-        argument_type: UploadFile
+        argument_type: file
         required: true
         default: null
-    locations: {}
-    files: {}
     results: {}
     blocking: false
     asynchronous: true

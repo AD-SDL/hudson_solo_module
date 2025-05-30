@@ -12,10 +12,10 @@ clr.AddReference(
 )
 clr.AddReference("System.Windows.Forms")
 
-from Hudson.SoloSoft.Communications import SoloClient  # noqa
-from System.Diagnostics import Process  # noqa
-from System.IO import Path  # noqa
-from System.Windows.Forms import SendKeys  # noqa
+from Hudson.SoloSoft.Communications import SoloClient  # type: ignore # noqa
+from System.Diagnostics import Process  # type: ignore # noqa
+from System.IO import Path  # type: ignore # noqa
+from System.Windows.Forms import SendKeys  # type: ignore # noqa
 
 
 class Solo:

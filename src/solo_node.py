@@ -4,10 +4,9 @@ REST-based node that interfaces with MADSci and provides a simple Sleep(t) funct
 
 import time
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from typing import Annotated
 
-from fastapi.datastructures import UploadFile
+from madsci.common.types.action_types import ActionSucceeded
 from madsci.common.types.node_types import RestNodeConfig
 from madsci.node_module.helpers import action
 from madsci.node_module.rest_node_module import RestNode
@@ -57,20 +56,18 @@ class SOLONode(RestNode):
     @action
     def run_protocol(
         self,
-        protocol_file: Annotated[UploadFile, "The protocol file (.hso) to run"],
+        protocol_file: Annotated[Path, "The protocol file (.hso) to run"],
     ) -> None:
         """Runs the provided SoloSoft .hso protocol file."""
         self.solo_interface.open_solo_soft()
-        with NamedTemporaryFile(delete_on_close=False) as f:
-            f.write(protocol_file.file.read())
-            f.close()
-            self.solo_interface.client.RunCommand("LOAD " + f.name)
-            self.solo_interface.client.RunCommand("RUN " + f.name)
+        self.solo_interface.client.RunCommand("LOAD " + str(protocol_file))
+        self.solo_interface.client.RunCommand("RUN " + str(protocol_file))
 
-            while self.solo_interface.client.RunCommand("GETSTATUS") != "IDLE":
-                time.sleep(1)
+        while self.solo_interface.client.RunCommand("GETSTATUS") != "IDLE":
+            time.sleep(1)
 
-            self.solo_interface.solo.close_solo_soft()
+        self.solo_interface.close_solo_soft()
+        return ActionSucceeded()
 
     @action
     def refill_tips(
@@ -92,6 +89,7 @@ class SOLONode(RestNode):
                 i += 1  # noqa
         with Path(self.config.tips_file_path).open(mode="w") as tips_file:
             tips_file.writelines(lines)
+        return ActionSucceeded()
 
 
 if __name__ == "__main__":
