@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 from typing import Annotated
 
-from madsci.common.types.action_types import ActionSucceeded
 from madsci.common.types.node_types import RestNodeConfig
 from madsci.node_module.helpers import action
 from madsci.node_module.rest_node_module import RestNode
@@ -61,13 +60,13 @@ class SOLONode(RestNode):
         """Runs the provided SoloSoft .hso protocol file."""
         self.solo_interface.open_solo_soft()
         self.solo_interface.client.RunCommand("LOAD " + str(protocol_file))
+        time.sleep(2)
         self.solo_interface.client.RunCommand("RUN " + str(protocol_file))
 
         while self.solo_interface.client.RunCommand("GETSTATUS") != "IDLE":
             time.sleep(1)
 
         self.solo_interface.close_solo_soft()
-        return ActionSucceeded()
 
     @action
     def refill_tips(
@@ -89,7 +88,6 @@ class SOLONode(RestNode):
                 i += 1  # noqa
         with Path(self.config.tips_file_path).open(mode="w") as tips_file:
             tips_file.writelines(lines)
-        return ActionSucceeded()
 
 
 if __name__ == "__main__":
