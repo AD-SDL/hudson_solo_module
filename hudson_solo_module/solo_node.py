@@ -33,7 +33,7 @@ class SOLONode(RestNode):
 
     solo_interface: Solo = None
     config_model = SOLONodeConfig
-    config: SOLONodeConfig
+    config: SOLONodeConfig = SOLONodeConfig()
 
     def startup_handler(self) -> None:
         """Initializes the SOLO client."""
