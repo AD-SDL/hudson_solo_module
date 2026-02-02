@@ -1,8 +1,9 @@
-"""Interface for controlling the solo device/instrument/robot."""
+"""Python interface for Hudson SOLO liquid handling robots."""
 
 # * Using .dlls and .NET assemblies
 # * pip install pythonnet
 # * See docs: https://pythonnet.github.io/pythonnet/python.html
+
 import time
 
 import clr
@@ -19,30 +20,30 @@ from System.Windows.Forms import SendKeys  # type: ignore # noqa
 
 
 class Solo:
-    """Class for controlling the Solo liquidhandler via SOLOSoft"""
+    """Interface for Hudson SOLO liquid handling robots."""
 
     def __init__(
         self,
         port: int = 11139,
         solo_soft_path: str = "C:\\Program Files (x86)\\Hudson Robotics\\SoloSoft\\SOLOSoft.exe",
     ) -> None:
-        """Create the Solo Interface and connect to the specified device"""
+        """Create Solo interface and connect to the SOLO device."""
         self.client = SoloClient()
         self.port = port
         self.client.Connect(self.port)
         self.solo_soft_path = solo_soft_path
 
     def __del__(self) -> None:
-        """Disconnect from the Solo device"""
+        """Disconnect from the SOLO device on deletion."""
         self.client.Disconnect()
 
     @property
     def connected(self) -> bool:
-        """Check whether the solo client is currently connected"""
+        """Checks whether the SOLO client is currently connected."""
         return self.client.IsConnected
 
     def open_solo_soft(self) -> None:
-        """Attempts to open solo soft"""
+        """Attempts to open SOLOSoft application."""
         processes = Process.GetProcessesByName(
             Path.GetFileNameWithoutExtension(self.solo_soft_path)
         )
@@ -57,7 +58,7 @@ class Solo:
             self.client.RunCommand("CLOSEALLFILES")
 
     def close_solo_soft(self) -> None:
-        """Close solo soft"""
+        """Close SOLOSoft application."""
         processes = Process.GetProcessesByName(
             Path.GetFileNameWithoutExtension(self.solo_soft_path)
         )
