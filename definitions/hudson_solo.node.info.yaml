@@ -1,6 +1,6 @@
 node_name: hudson_solo
 node_id: 01JV2YA5Z7D1JSBZSG7GHF8RJ4
-node_url: null
+node_url: http://hudson01.cels.anl.gov:2003/
 node_description: Node for the Hudson SOLO liquid handler
 node_type: device
 module_name: hudson_solo_module
@@ -26,6 +26,7 @@ commands: {}
 is_template: false
 config_defaults:
   port: 2003
+  host: hudson01.cels.anl.gov
 actions:
   run_protocol:
     name: run_protocol
@@ -63,7 +64,7 @@ config:
   event_client_config: null
   resource_server_url: null
   minio_client_config: null
-  host: 127.0.0.1
+  host: hudson01.cels.anl.gov
   port: 2003
   protocol: http
   solo_port: 11139
